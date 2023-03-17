@@ -133,13 +133,13 @@ exports.update = function(req,res) {
             const opt_code = random(1000000, 9999999);
             const activation_code = crypto.createHash('md5').update(opt_code.toString()).digest('hex');
             console.log(opt_code);
-            // mailer.mail({
-            //     Name : user_new.username,
-            //     content:"For verify your email address, enter this verification code when prompted: "+ opt_code
-            // },user_new.email,'Email Verification',config.site_email,function(error,result) {
-            //     if(error) {
-            //         console.log("email not working");
-            //     }   
+            mailer.mail({
+                Name : user_new.username,
+                content:"For verify your email address, enter this verification code when prompted: "+ opt_code
+            },user_new.email,'Email Verification',config.site_email,function(error,result) {
+                if(error) {
+                    console.log("email not working");
+                }   
                 user_new.activation_code = activation_code;
 
                 user_new.save(function (err , user_new) {
@@ -158,7 +158,7 @@ exports.update = function(req,res) {
                     });
                 });
                 return;
-            // });
+            });
         }
         if(user.status == 'inactive') {
             res.json({
@@ -189,13 +189,13 @@ exports.update = function(req,res) {
         const opt_code = random(1000000, 9999999);
         const activation_code = crypto.createHash('md5').update(opt_code.toString()).digest('hex');
         console.log(opt_code);
-        // mailer.mail({
-        //     Name : user.username,
-        //     content:"For verify your email address, enter this verification code when prompted: "+ opt_code
-        // },user.email,'Email Verification',config.site_email,function(error,result) {
-        //     if(error) {
-        //         console.log("email not working");
-        //     }   
+        mailer.mail({
+            Name : user.username,
+            content:"For verify your email address, enter this verification code when prompted: "+ opt_code
+        },user.email,'Email Verification',config.site_email,function(error,result) {
+            if(error) {
+                console.log("email not working");
+            }   
             user.activation_code = activation_code;
 
             // save the user and check for errors
@@ -234,7 +234,7 @@ exports.update = function(req,res) {
             });
         });
         
-    // });
+    });
 }
 
 exports.optVerify = function(req,res) {

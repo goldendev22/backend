@@ -22,10 +22,10 @@ const config = {
       type:"",
       smtp: {
         host: 'smtp.gmail.com',
-        port: 465,
+        port: 587,
         secure:true,
-        username:'trustbusiness2021@gmail.com',
-        password:'trustteam2021'
+        username:'apolloskype0@gmail.com',
+        password:'rifo uqjk fpiz wrna'
       }
     },
     site_name:'Cryptotrades',
