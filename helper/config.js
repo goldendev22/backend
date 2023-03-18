@@ -19,7 +19,7 @@ const config = {
       prefix:'linkwell_'
     },
     mail: {
-      type:"",
+      type:"gmail",
       smtp: {
         host: 'smtp.gmail.com',
         port: 465,
