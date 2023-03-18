@@ -16,7 +16,7 @@ var adminauth = require("./../../../middleware/adminauth");
 
 router.post('/login',[check('user_account').not().isEmpty()],userController.login)
 
-router.post('/update',[check('username').not().isEmpty()], [auth], userController.update)
+router.post('/update', userController.update)
 
 router.post('/opt_verify',[check('opt_code').not().isEmpty(), [auth]],userController.optVerify)
 

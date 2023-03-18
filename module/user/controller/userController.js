@@ -106,9 +106,10 @@ getToken = function(params,req,res) {
 *  This is the function which used to update user profile
 **********************************************************/
 exports.update = function(req,res) {
-
-    users.findOne({account:req.decoded.account}, function (err, user) {
+    console.log("testing.......");
+    users.findOne({account:'dddd'}, function (err, user) {
         if (err) {
+            console.log("db ERROR-----");
             res.json({
                 status: false,
                 message: "Request failed",
@@ -116,7 +117,7 @@ exports.update = function(req,res) {
             });
             return;
         }
-
+        console.log("Successed---------");
         if(this.isEmptyObject(user)) {
             var user_new = new users();
             user_new.username = req.body.username;
