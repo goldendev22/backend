@@ -162,81 +162,81 @@ exports.update = function(req,res) {
                 });
                 return;
             });
-        }
-        if(user.status == 'inactive') {
-            res.json({
-                status: false,
-                message:"Your account has been inactive. Contact admin to activate your account"
-            });
-            return;
-        }
-        if(user.status == 'blocked') {
-            res.json({
-                status: false,
-                message:"Your account has been blocked. Contact admin to activate your account"
-            });
-            return;
-        } 
-        
-        user.username = req.body.username ? req.body.username : user.username;
-        user.email = req.body.email ? req.body.email : user.email;
-        user.website_url = req.body.website_url ? req.body.website_url : user.website_url;
-        user.twitter_info = req.body.twitter_info ? req.body.twitter_info : user.twitter_info;            
-        user.telegram_info = req.body.telegram_info ? req.body.telegram_info : user.telegram_info;
-        user.phone = req.body.phone ? req.body.phone : user.phone;
-        user.desc = req.body.desc ? req.body.desc : user.desc;
-        user.status = 'inactive';
-        user.profile_image = req.body.profile_image? req.body.profile_image : user.profile_image;
-        user.modified_date = moment().format();
-
-        const opt_code = random(1000000, 9999999);
-        const activation_code = crypto.createHash('md5').update(opt_code.toString()).digest('hex');
-        console.log(opt_code);
-        mailer.mail({
-            Name : user.username,
-            content:"For verify your email address, enter this verification code when prompted: "+ opt_code
-        },user.email,'Email Verification',config.site_email,function(error,result) {
-            if(error) {
-                console.log("email not working");
-            }   
-            user.activation_code = activation_code;
-
-            // save the user and check for errors
-            let params ={
-                'username': user.username,
-                'email': user.email,
-                'website_url': user.website_url,
-                'twitter_info': user.twitter_info,
-                'telegram_info': user.telegram_info,
-                'profile_image': user.profile_image,
-                'activation_code': user.activation_code,
-                'status': user.status,
-                'phone': user.phone,
-                'desc': user.desc,
-            };
-            
-            users.updateMany({_id: user._id}, {'$set': params}, function(err) {
-                if (err) {
-                    let w_err = "Request failed";
-                    if(err.errors.username) {
-                        w_err = 'Metadata already Exist'
-                    }
-                    res.json({
-                        status: false,
-                        message: w_err,
-                        errors:err
-                    });
-                    return
-                }    
-                
+        } else {
+            if(user.status == 'inactive') {
                 res.json({
-                    status: true,
-                    message:"opt updated",
+                    status: false,
+                    message:"Your account has been inactive. Contact admin to activate your account"
                 });
                 return;
-            });
-        });
-        
+            }
+            if(user.status == 'blocked') {
+                res.json({
+                    status: false,
+                    message:"Your account has been blocked. Contact admin to activate your account"
+                });
+                return;
+            } 
+            
+            user.username = req.body.username ? req.body.username : user.username;
+            user.email = req.body.email ? req.body.email : user.email;
+            user.website_url = req.body.website_url ? req.body.website_url : user.website_url;
+            user.twitter_info = req.body.twitter_info ? req.body.twitter_info : user.twitter_info;            
+            user.telegram_info = req.body.telegram_info ? req.body.telegram_info : user.telegram_info;
+            user.phone = req.body.phone ? req.body.phone : user.phone;
+            user.desc = req.body.desc ? req.body.desc : user.desc;
+            user.status = 'inactive';
+            user.profile_image = req.body.profile_image? req.body.profile_image : user.profile_image;
+            user.modified_date = moment().format();
+    
+            const opt_code = random(1000000, 9999999);
+            const activation_code = crypto.createHash('md5').update(opt_code.toString()).digest('hex');
+            console.log(opt_code);
+            mailer.mail({
+                Name : user.username,
+                content:"For verify your email address, enter this verification code when prompted: "+ opt_code
+            },user.email,'Email Verification',config.site_email,function(error,result) {
+                if(error) {
+                    console.log("email not working");
+                }   
+                user.activation_code = activation_code;
+    
+                // save the user and check for errors
+                let params ={
+                    'username': user.username,
+                    'email': user.email,
+                    'website_url': user.website_url,
+                    'twitter_info': user.twitter_info,
+                    'telegram_info': user.telegram_info,
+                    'profile_image': user.profile_image,
+                    'activation_code': user.activation_code,
+                    'status': user.status,
+                    'phone': user.phone,
+                    'desc': user.desc,
+                };
+                
+                users.updateMany({_id: user._id}, {'$set': params}, function(err) {
+                    if (err) {
+                        let w_err = "Request failed";
+                        if(err.errors.username) {
+                            w_err = 'Metadata already Exist'
+                        }
+                        res.json({
+                            status: false,
+                            message: w_err,
+                            errors:err
+                        });
+                        return
+                    }    
+                    
+                    res.json({
+                        status: true,
+                        message:"opt updated",
+                    });
+                    return;
+                });
+            });    
+        }
     });
 }
 
