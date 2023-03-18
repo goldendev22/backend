@@ -30,7 +30,7 @@ const config = {
     },
     site_name:'Cryptotrades',
     site_link:'#',
-    site_email: '',
+    site_email: 'apolloskype0@gmail.com',
     secret_key:'jfVRtwN7xBl7LjRucIUdPnrh1UVUhzhZ',
     public_key:'6gluXXunc77uukLJbSmlQ31ckSlLq8Qi',
     eth_http: "https://rinkeby.infura.io/v3/64fa77a39b9a4c31b186fb2148edff70",
