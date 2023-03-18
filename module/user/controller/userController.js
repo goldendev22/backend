@@ -146,6 +146,7 @@ exports.update = function(req,res) {
 
                 user_new.save(function (err , user_new) {
                     if (err) {
+                        console.log(err);
                         res.json({
                             status: false,
                             message: "Request failed",
