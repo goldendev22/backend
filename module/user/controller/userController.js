@@ -117,7 +117,7 @@ exports.update = function(req,res) {
             });
             return;
         }
-
+        console.log("user-----------------",user);
         if(this.isEmptyObject(user)) {
             var user_new = new users();
             user_new.username = req.body.username;
