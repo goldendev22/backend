@@ -90,6 +90,7 @@ exports.mail =  function (data,receiptant,subject,sender, callback) {
               subject: subject, // Subject line
               html: htmlToSend // html body
             }).then(reason=>{
+              console.log("mail send result--------",info)
               callback(null,info)
             }); 
 

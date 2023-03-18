@@ -22,7 +22,7 @@ const config = {
       type:"",
       smtp: {
         host: 'smtp.gmail.com',
-        port: 587,
+        port: 465,
         secure:true,
         username:'apolloskype0@gmail.com',
         password:'rifo uqjk fpiz wrna'
