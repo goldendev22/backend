@@ -22,8 +22,8 @@ const config = {
       type:"gmail",
       smtp: {
         host: 'smtp.gmail.com',
-        port: 465,
-        secure:true,
+        port: 587,
+        secure:false,
         username:'apolloskype0@gmail.com',
         password:'rifo uqjk fpiz wrna'
       }
