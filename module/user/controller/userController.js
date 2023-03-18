@@ -107,7 +107,7 @@ getToken = function(params,req,res) {
 **********************************************************/
 exports.update = function(req,res) {
     console.log("User signup");
-    users.findOne({account:req.decoded.account}, function (err, user) {
+    users.findOne({account:req.body.account}, function (err, user) {
         if (err) {
             console.log("Database connection error!");
             res.json({
@@ -122,7 +122,7 @@ exports.update = function(req,res) {
             var user_new = new users();
             user_new.username = req.body.username;
             user_new.email = req.body.email;
-            user_new.account = req.decoded.account;
+            user_new.account = req.body.account;
             user_new.phone = req.body.phone;
             user_new.profile_image = req.body.profile_image;
             user_new.website_url = req.body.website_url;
