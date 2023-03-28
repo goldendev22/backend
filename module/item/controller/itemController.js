@@ -13,6 +13,9 @@ const { validationResult } = require('express-validator');
 var collections = require('./../../collection/model/collectionModel');
 var users = require('./../../user/model/userModel');
 var orders = require('../model/orderModel')
+var lists = require('../model/listModel')
+var ipfsAPI = require('ipfs-api');
+var ipfs = ipfsAPI('ipfs.infura.io', '5001', { protocol: 'https' });
 
 exports.getMaxTokenId = function(req,res) {
     const errors = validationResult(req);
@@ -62,26 +65,38 @@ exports.slotAdd = function(req,res) {
     var slot = new slots();
     slot.collection_id = req.body.collection;
     slot.image = req.body.slotImage;
+    slot.animation_url = req.body.animation_url;
     slot.slot_id = req.body.slotId;
     slot.slot_val = req.body.slot;
-
-    slot.save(function (err ,slotObj) {
-        if (err) {
-            console.log(err)
+    console.log(req.body.slotId);
+    slots.findOne({collection_id:req.body.collection, slot_id: req.body.slotId}, function (err, selectedObj) {
+        if(!selectedObj) {
+            slot.save(function (err ,slotObj) {
+                if (err) {
+                    console.log(err)
+                    res.json({
+                        status: false,
+                        message: "Request failed",
+                        errors:err
+                    });
+                    return;
+                } else {
+                    res.json({
+                        status: true,
+                        message: "slot created successfully",
+                        result: slotObj._id
+                    });
+                }
+            })
+        } else {
             res.json({
                 status: false,
                 message: "Request failed",
                 errors:err
             });
             return;
-        } else {
-            res.json({
-                status: true,
-                message: "slot created successfully",
-                result: slotObj
-            });
         }
-    })
+    });
 }
 
 /*********************************************************
@@ -105,36 +120,44 @@ exports.add = function(req,res) {
     item.token_id = req.body.tokenId;
     item.lazy_minting = req.body.lazy_minting;
     item.status = "active";
+    item.type = req.body.type;
+    item.slot = req.body.slot;
+    item.fraction = req.body.fraction;
 
-    collections.findOne({_id:req.body.collection}, function (err, collection) {
-        if (err || !collection) {
-            res.json({
-                status: false,
-                message: "Collection not found",
-                errors:err
-            });
-            return;
+    ipfs.add(req.body.metadata, function (err, file) {
+        if(!err) {
+            item.metadata_url = file[0].hash;
         }
-        item.save(function (err ,itemObj) {
-            if (err) {
-                console.log(err)
+        collections.findOne({_id:req.body.collection}, function (err, collection) {
+            if (err || !collection) {
                 res.json({
                     status: false,
-                    message: "Request failed",
+                    message: "Collection not found",
                     errors:err
                 });
                 return;
             }
-            collection.item_count = collection.item_count + 1;
-            collection.save(function (err ,collectionObj) {
-                res.json({
-                    status: true,
-                    message: "Item created successfully",
-                    result: itemObj
+            item.save(function (err ,itemObj) {
+                if (err) {
+                    console.log(err)
+                    res.json({
+                        status: false,
+                        message: "Request failed",
+                        errors:err
+                    });
+                    return;
+                }
+                collection.item_count = collection.item_count + 1;
+                collection.save(function (err ,collectionObj) {
+                    res.json({
+                        status: true,
+                        message: "Item created successfully",
+                        result: itemObj
+                    });
                 });
-            });
-        })
-    });
+            })
+        });
+    })
 }
 
 /***********************************************************
@@ -160,10 +183,11 @@ exports.list = function(req,res) {
     } 
    
     query = query.where('collection_id',collection)
+    query = query.where('listed', false)
     query = query.where('status','active')
     query = query.sort('-create_date');
 
-    var fields = ['token_id', 'current_owner', 'creator', 'detail', 'lazy_minting']
+    var fields = ['type', 'fraction', 'slot', 'metadata_url', 'token_id', 'current_owner', 'creator', 'detail', 'lazy_minting']
     users.findOne({account:req.body.owner}, function (err, user) {
         if (err || !collection) {
             res.json({
@@ -174,7 +198,7 @@ exports.list = function(req,res) {
             return;
         }
         query = query.where('current_owner',user._id)
-        items.find(query, fields, {skip: offset, limit: limit}).populate('collection_id').populate('current_owner').populate('creator').then(function (result) {
+        items.find(query, fields, {skip: offset, limit: limit}).populate('collection_id').populate('current_owner').populate('creator').populate('slot').then(function (result) {
             res.json({
                 status: true,
                 message: "Items retrieved successfully",
@@ -192,8 +216,8 @@ exports.getItem = function(req,res) {
     var query = items.find();
     query = query.where('_id', item_id)
 
-    var fields = ['token_id', 'current_owner', 'creator', 'detail', 'lazy_minting']
-    items.find(query, fields).populate('collection_id').populate('current_owner').populate('creator').then(function (result) {
+    var fields = ['token_id', 'fraction', 'slot', 'type', 'metadata_url', 'current_owner', 'creator', 'detail', 'lazy_minting']
+    items.find(query, fields).populate('collection_id').populate('current_owner').populate('creator').populate('slot').then(function (result) {
         res.json({
             status: true,
             message: "Items retrieved successfully",
@@ -203,10 +227,11 @@ exports.getItem = function(req,res) {
 }
 
 /***************************************************************
-* This is the function which used to add fractions in database
+* This is the function which used to add listed item in database
 ***************************************************************/
-exports.addFractions = function(req,res) {
+exports.marketListItem = function(req,res) {
     const errors = validationResult(req);
+    console.log(errors)
     if (!errors.isEmpty()) {
         res.json({
             status: false,
@@ -215,22 +240,14 @@ exports.addFractions = function(req,res) {
         });
         return;
     }  
-    var fraction = new fractions();
-    fraction.item_id = req.body.item_id;
-    fraction.name = req.body.name;
-    fraction.symbol = req.body.symbol;
-    fraction.decimals = req.body.decimals;
-    fraction.fractionCount = req.body.totalSupply;
-    fraction.fractionPrice = req.body.price;
-    fraction.fractionAddress = req.body.fractionAddress;
-    fraction.paymentToken = req.body.paymentToken;
-    fraction.type = req.body.type;
-    fraction.chainId = req.body.chainId;
+    var list = new lists();
+    list.item_id = req.body.item_id;
+    list.price = req.body.price;
+    list.isAuction = req.body.isAuction;
+    list.user_id = req.decoded.user_id;
+    list.auctionDays = req.body.auctionDays;
+    list.collection_id = req.body.collection;
 
-    if(fraction.type == 'auction'){
-        fraction.fee = req.body.fee;
-        fraction.days = req.body.days;
-    }
     items.findOne({_id:req.body.item_id}, function (err, item) {
         if (err || !item) {
             res.json({
@@ -240,9 +257,9 @@ exports.addFractions = function(req,res) {
             });
             return;
         }
-        fraction.collection_id = item.collection_id;
-        fraction.save(function (err ,fractionObj) {
+        list.save(function (err ,listObj) {
             if (err) {
+                console.log(err)
                 res.json({
                     status: false,
                     message: "Request failed",
@@ -250,25 +267,16 @@ exports.addFractions = function(req,res) {
                 });
                 return;
             }
-            item.frac_id = fractionObj._id;
+            item.listed = true;
             item.save(function (err ,itemObj) {
-                if (err) {
-                    console.log(err)
-                    res.json({
-                        status: false,
-                        message: "Item not saved",
-                        errors:err
-                    });
-                    return;
-                }
                 res.json({
                     status: true,
-                    message: "fractionalized successfully",
-                    result: fractionObj
+                    message: "listed on marketplace successfully",
+                    result: itemObj
                 });
             });
         })
-    })
+    });
 }
 
 /**************************************************************

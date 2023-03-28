@@ -28,7 +28,7 @@ const swaggerDocument = require('./swagger.json');
 global.__basedir = __dirname;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(__dirname + '/media'));
+app.use("/media", express.static(__dirname + '/media'));
 app.use(cors())
 
 // const options = {

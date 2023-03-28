@@ -65,7 +65,7 @@ var itemthumbupload = multer({ storage: itemthumbstorage })
 
 var itemmediastorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'media/images/item/media')
+    cb(null, 'media/item/media')
   },
   filename: function (req, file, cb) {
     cb(null, file.originalname)
@@ -89,6 +89,7 @@ router.post('/cover',coverupload.single('file'),mediaController.uploadImage)
 router.post('/collectionlogo',collectionlogoupload.single('file'),mediaController.uploadImage)
 router.post('/collectionbanner',collectionbannerupload.single('file'),mediaController.uploadImage)
 router.post('/itemthumb',itemthumbupload.single('file'),mediaController.uploadImage)
-router.post('/itemmedia',itemmediaupload.single('file'),mediaController.uploadImage)
+router.post('/itemmedia',itemmediaupload.single('file'),mediaController.uploadMedia)
 router.post('/category',categoryupload.single('file'),mediaController.uploadImage)
+
 module.exports = router

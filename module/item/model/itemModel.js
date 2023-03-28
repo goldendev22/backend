@@ -9,7 +9,6 @@ Purpose : This is the file which used to define collection schema that will comm
 
 var mongoose = require('mongoose');
 var mongoosePaginate = require('mongoose-paginate-v2');
-var uniqueValidator = require('mongoose-unique-validator');
 var config = require('./../../../helper/config')
 const Schema = mongoose.Schema;
 // Setup schema
@@ -31,6 +30,14 @@ var itemSchema = mongoose.Schema({
         type: Number,
         default:0
     },
+    type: {
+        type: String,
+        default: ''
+    },
+    slot: {
+        type: Schema.Types.ObjectId,
+        ref: 'slot'
+    },
     token_id:{
         type: Number,
         default:0
@@ -49,10 +56,22 @@ var itemSchema = mongoose.Schema({
     detail: {
         type: String
     },
+    metadata_url: {
+        type: String,
+        default: ''
+    },
     status:{
         type: String,
         enum : ['active','inactive'],
         default: 'inactive'
+    },
+    fraction: {
+        type: Number,
+        default: 1
+    },
+    listed: {
+        type: Boolean,
+        default: false
     },
     minted_date: {
         type: Date,
@@ -63,7 +82,6 @@ var itemSchema = mongoose.Schema({
     }
 });
 
-//itemSchema.plugin(uniqueValidator);
 itemSchema.plugin(mongoosePaginate);
 
 module.exports = mongoose.model('item', itemSchema,config.db.prefix+'item');

@@ -19,6 +19,10 @@ var slotSchema = mongoose.Schema({
         type: String,
         default:''
     },
+    animation_url: {
+        type: String,
+        default: ''
+    },
     slot_id: {
         type: Number
     },

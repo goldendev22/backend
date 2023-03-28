@@ -20,7 +20,7 @@ router.post('/slotAdd',[check('collection').not().isEmpty(),auth],itemController
 router.post('/add',[check('collection').not().isEmpty(),auth],itemController.add)
 router.post('/list',[check('collection').not().isEmpty(), auth],itemController.list)
 router.post('/getItem',[check('item_id').not().isEmpty(),auth],itemController.getItem)
-router.post('/fractionAdd',[check('item_id').not().isEmpty(),auth],itemController.addFractions)
+router.post('/marketListItem',[check('item_id').not().isEmpty(),auth],itemController.marketListItem)
 router.post('/fractionList',[check('chainId').not().isEmpty(),auth],itemController.fractionList)
 router.post('/fractionMarketList',[check('chainId').not().isEmpty()],itemController.fractionMarketList)
 router.post('/fractionGet',[check('chainId').not().isEmpty()],itemController.fractionGet)
