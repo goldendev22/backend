@@ -35,8 +35,8 @@ var itemSchema = mongoose.Schema({
         default: ''
     },
     slot: {
-        type: Schema.Types.ObjectId,
-        ref: 'slot'
+        type: String,
+        default: ''
     },
     token_id:{
         type: Number,

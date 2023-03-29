@@ -106,10 +106,8 @@ getToken = function(params,req,res) {
 *  This is the function which used to update user profile
 **********************************************************/
 exports.update = function(req,res) {
-    console.log("User signup");
-    users.findOne({account:req.body.account}, function (err, user) {
+    users.findOne({account:req.decoded.account}, function (err, user) {
         if (err) {
-            console.log("Database connection error!");
             res.json({
                 status: false,
                 message: "Request failed",
@@ -117,36 +115,34 @@ exports.update = function(req,res) {
             });
             return;
         }
-        console.log("user-----------------",user);
+
         if(this.isEmptyObject(user)) {
             var user_new = new users();
             user_new.username = req.body.username;
             user_new.email = req.body.email;
-            user_new.account = req.body.account;
+            user_new.account = req.decoded.account;
             user_new.phone = req.body.phone;
             user_new.profile_image = req.body.profile_image;
             user_new.website_url = req.body.website_url;
             user_new.twitter_info = req.body.twitter_info;
             user_new.telegram_info = req.body.telegram_info;
             user_new.desc = req.body.desc;
-            user_new.status = 'inactive';
-
-            const opt_code = random(1000000, 9999999);
-            const activation_code = crypto.createHash('md5').update(opt_code.toString()).digest('hex');
-            console.log(opt_code);
-            mailer.mail({
-                Name : user_new.username,
-                content:"For verify your email address, enter this verification code when prompted: "+ opt_code
-            },user_new.email,'Email Verification',config.site_email,function(error,result) {
-                if(error) {
-                    console.log("email not working");
-                }   
-                console.log("email working...");
-                user_new.activation_code = activation_code;
+            user_new.status = 'active';
+           
+            // const opt_code = random(1000000, 9999999);
+            // const activation_code = crypto.createHash('md5').update(opt_code.toString()).digest('hex');
+            // console.log(opt_code);
+            // mailer.mail({
+            //     Name : user_new.username,
+            //     content:"For verify your email address, enter this verification code when prompted: "+ opt_code
+            // },user_new.email,'Email Verification',config.site_email,function(error,result) {
+            //     if(error) {
+            //         console.log("email not working");
+            //     }   
+                // user_new.activation_code = activation_code;
 
                 user_new.save(function (err , user_new) {
                     if (err) {
-                        console.log(err);
                         res.json({
                             status: false,
                             message: "Request failed",
@@ -155,89 +151,104 @@ exports.update = function(req,res) {
                         return;
                     } 
                         
-                    res.json({
-                        status: true,
-                        message:"opt successful",
-                    });
-                });
-                return;
-            });
-        } else {
-            if(user.status == 'inactive') {
-                res.json({
-                    status: false,
-                    message:"Your account has been inactive. Contact admin to activate your account"
-                });
-                return;
-            }
-            if(user.status == 'blocked') {
-                res.json({
-                    status: false,
-                    message:"Your account has been blocked. Contact admin to activate your account"
-                });
-                return;
-            } 
-            
-            user.username = req.body.username ? req.body.username : user.username;
-            user.email = req.body.email ? req.body.email : user.email;
-            user.website_url = req.body.website_url ? req.body.website_url : user.website_url;
-            user.twitter_info = req.body.twitter_info ? req.body.twitter_info : user.twitter_info;            
-            user.telegram_info = req.body.telegram_info ? req.body.telegram_info : user.telegram_info;
-            user.phone = req.body.phone ? req.body.phone : user.phone;
-            user.desc = req.body.desc ? req.body.desc : user.desc;
-            user.status = 'inactive';
-            user.profile_image = req.body.profile_image? req.body.profile_image : user.profile_image;
-            user.modified_date = moment().format();
-    
-            const opt_code = random(1000000, 9999999);
-            const activation_code = crypto.createHash('md5').update(opt_code.toString()).digest('hex');
-            console.log(opt_code);
-            mailer.mail({
-                Name : user.username,
-                content:"For verify your email address, enter this verification code when prompted: "+ opt_code
-            },user.email,'Email Verification',config.site_email,function(error,result) {
-                if(error) {
-                    console.log("email not working");
-                }   
-                user.activation_code = activation_code;
-    
-                // save the user and check for errors
-                let params ={
-                    'username': user.username,
-                    'email': user.email,
-                    'website_url': user.website_url,
-                    'twitter_info': user.twitter_info,
-                    'telegram_info': user.telegram_info,
-                    'profile_image': user.profile_image,
-                    'activation_code': user.activation_code,
-                    'status': user.status,
-                    'phone': user.phone,
-                    'desc': user.desc,
-                };
-                
-                users.updateMany({_id: user._id}, {'$set': params}, function(err) {
-                    if (err) {
-                        let w_err = "Request failed";
-                        if(err.errors.username) {
-                            w_err = 'Metadata already Exist'
+                    let token = jwt.sign({authenticated: true, username: user_new.username,email: user_new.email,phone:user_new.phone,profile_image:user_new.profile_image,status:user_new.status,website_url:user_new.website_url,twitter_info:user_new.twitter_info,telegram_info:user_new.telegram_info, account:user_new.account, desc:user_new.desc},
+                        config.secret_key,
+                        { expiresIn: '24h' // expires in 24 hours
                         }
-                        res.json({
-                            status: false,
-                            message: w_err,
-                            errors:err
-                        });
-                        return
-                    }    
-                    
+                    );
                     res.json({
                         status: true,
-                        message:"opt updated",
+                        token: token,
+                        message:"update success",
                     });
                     return;
                 });
-            });    
+                return;
+            // });
         }
-    });
+        if(user.status == 'inactive') {
+            console.log("dddsssss")
+            res.json({
+                status: false,
+                message:"Your account has been inactive. Contact admin to activate your account"
+            });
+            return;
+        }
+        if(user.status == 'blocked') {
+            res.json({
+                status: false,
+                message:"Your account has been blocked. Contact admin to activate your account"
+            });
+            return;
+        } 
+        
+        user.username = req.body.username ? req.body.username : user.username;
+        user.email = req.body.email ? req.body.email : user.email;
+        user.website_url = req.body.website_url ? req.body.website_url : user.website_url;
+        user.twitter_info = req.body.twitter_info ? req.body.twitter_info : user.twitter_info;            
+        user.telegram_info = req.body.telegram_info ? req.body.telegram_info : user.telegram_info;
+        user.phone = req.body.phone ? req.body.phone : user.phone;
+        user.desc = req.body.desc ? req.body.desc : user.desc;
+        user.status = 'active';
+        user.profile_image = req.body.profile_image? req.body.profile_image : user.profile_image;
+        user.modified_date = moment().format();
+
+        // const opt_code = random(1000000, 9999999);
+        // const activation_code = crypto.createHash('md5').update(opt_code.toString()).digest('hex');
+        // console.log(opt_code);
+        // mailer.mail({
+        //     Name : user.username,
+        //     content:"For verify your email address, enter this verification code when prompted: "+ opt_code
+        // },user.email,'Email Verification',config.site_email,function(error,result) {
+        //     if(error) {
+        //         console.log("email not working");
+        //     }   
+            // user.activation_code = activation_code;
+
+            // save the user and check for errors
+            let params ={
+                'username': user.username,
+                'email': user.email,
+                'website_url': user.website_url,
+                'twitter_info': user.twitter_info,
+                'telegram_info': user.telegram_info,
+                'profile_image': user.profile_image,
+                'activation_code': user.activation_code,
+                'status': user.status,
+                'phone': user.phone,
+                'desc': user.desc,
+            };
+            
+            users.updateMany({_id: user._id}, {'$set': params}, function(err) {
+                if (err) {
+                    console.log(err)
+                    let w_err = "Request failed";
+                    if(err.errors.username) {
+                        w_err = 'Metadata already Exist'
+                    }
+                    res.json({
+                        status: false,
+                        message: w_err,
+                        errors:err
+                    });
+                    return
+                }    
+                
+                let token = jwt.sign({authenticated: true, username: user.username,email: user.email,phone:user.phone,profile_image:user.profile_image,status:user.status,website_url:user.website_url,twitter_info:user.twitter_info,telegram_info:user.telegram_info, account:user.account, desc:user.desc},
+                    config.secret_key,
+                    { expiresIn: '24h' // expires in 24 hours
+                    }
+                );
+                res.json({
+                    status: true,
+                    token: token,
+                    message:"update success",
+                });
+                return;
+            });
+        });
+        
+    // });
 }
 
 exports.optVerify = function(req,res) {

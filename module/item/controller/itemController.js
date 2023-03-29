@@ -198,7 +198,7 @@ exports.list = function(req,res) {
             return;
         }
         query = query.where('current_owner',user._id)
-        items.find(query, fields, {skip: offset, limit: limit}).populate('collection_id').populate('current_owner').populate('creator').populate('slot').then(function (result) {
+        items.find(query, fields, {skip: offset, limit: limit}).populate('collection_id').populate('current_owner').populate('creator').then(function (result) {
             res.json({
                 status: true,
                 message: "Items retrieved successfully",
@@ -217,7 +217,7 @@ exports.getItem = function(req,res) {
     query = query.where('_id', item_id)
 
     var fields = ['token_id', 'fraction', 'slot', 'type', 'metadata_url', 'current_owner', 'creator', 'detail', 'lazy_minting']
-    items.find(query, fields).populate('collection_id').populate('current_owner').populate('creator').populate('slot').then(function (result) {
+    items.find(query, fields).populate('collection_id').populate('current_owner').populate('creator').then(function (result) {
         res.json({
             status: true,
             message: "Items retrieved successfully",
