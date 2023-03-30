@@ -12,14 +12,8 @@
   "dependencies": {
     "bcrypt": "^5.1.0",
     "cors": "^2.8.5",
-    "ethereumjs-tx": "^2.1.2",
-    "ethers": "^5.5.1",
     "express": "^4.17.1",
     "express-validator": "^6.2.0",
-    "firebase-admin": "^9.0.0",
-    "formidable": "^2.1.1",
-    "fs": "0.0.1-security",
-    "handlebars": "^4.5.3",
     "image-downloader": "^4.0.1",
     "ipfs-api": "^26.1.2",
     "jsonwebtoken": "^8.5.1",
@@ -35,7 +29,6 @@
     "randomstring": "^1.1.5",
     "request": "^2.88.2",
     "swagger-ui-express": "^4.1.2",
-    "validator": "^12.0.0",
-    "web3": "^1.6.0"
+    "validator": "^12.0.0"
   }
 }
