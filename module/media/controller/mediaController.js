@@ -40,6 +40,8 @@ exports.uploadImage = function (req,res) {
 
 exports.uploadMedia = async function(req,res) {
   var data = fs.readFileSync(req.file.path);
+  console.log("----------------")
+  console.log(data);
   try {
     ipfs.add(data, function (err, file) {
       if(err) {
