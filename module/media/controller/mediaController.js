@@ -50,6 +50,9 @@ exports.uploadMedia = async function(req,res) {
           data:  ''
         })
       } else {
+        console.log("-------------dddddddddkkkkk------------")
+        console.log(file)
+        console.log("-------------end-----------")
         res.json({
           status: true,
           message: 'media upload successfully completed',
