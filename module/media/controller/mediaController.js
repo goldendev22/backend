@@ -2,7 +2,7 @@ var request = require("request");
 var fs = require("fs");
 var download = require('image-downloader');
 var ipfsAPI = require('ipfs-api');
-var ipfs = ipfsAPI('ipfs.infura.io', '5001', { protocol: 'https' });
+var ipfs = ipfsAPI({ host: 'ipfs.infura.io', port: 5001, protocol: 'https' });
 
 exports.saveFacebookImageUrl = function(url,imgname,callback) {
     request(url, function(err, res, body) {
